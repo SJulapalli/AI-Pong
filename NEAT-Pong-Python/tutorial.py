@@ -2,6 +2,7 @@ import pygame
 from pong import Game
 import neat
 import os
+import pickle
 
 class PongGame:
 
@@ -12,7 +13,9 @@ class PongGame:
         self.right_paddle = self.game.right_paddle
         self.ball = self.game.ball
 
-    def test_ai(self):
+    def test_ai(self, genome, config):
+        net = neat.nn.FeedForwardNetwork.create(genome, config)
+
         run = True
         clock = pygame.time.Clock()
 
@@ -26,6 +29,16 @@ class PongGame:
                 if event.type == pygame.QUIT:
                     run = False
                     break
+
+            output = net.activate((self.left_paddle.y, self.ball.y, abs(self.left_paddle.x - self.ball.x)))
+            decision = output.index(max(output))
+
+            # Interpretting NN decisions
+            # 0 means staying still
+            if decision == 1:
+                self.game.move_paddle(True, True)
+            elif decision == 2:
+                self.game.move_paddle(True, False)
 
             # Handles player input
             keys = pygame.key.get_pressed()
@@ -61,6 +74,8 @@ class PongGame:
             output2 = net1.activate((self.right_paddle.y, self.ball.y, abs(self.right_paddle.x - self.ball.x)))
             decision2 = output2.index(max(output2))
 
+            # Interpretting NN decisions
+            # 0 means staying still
             if decision1 == 1:
                 self.game.move_paddle(True, True)
             elif decision1 == 2:
@@ -110,7 +125,19 @@ def run_neat(config):
     p.add_reporter(stats)
     p.add_reporter(neat.Checkpointer(1))
 
-    p.run(eval_genomes, 50)
+    winner = p.run(eval_genomes, 50)
+    
+    with open("best.pickle", "wb") as f:
+        pickle.dump(winner, f)
+
+def test_ai(config):
+    width, height = 700, 500
+    window = pygame.display.set_mode((width, height))
+    with open("best.pickle", "rb") as f:
+        winner = pickle.load(f)
+    
+    game = PongGame(window, width, height)
+    game.test_ai(winner)
 
 if __name__ == "__main__":
     local_dir = os.path.dirname(__file__)
@@ -119,3 +146,4 @@ if __name__ == "__main__":
     config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
                          neat.DefaultSpeciesSet, neat.DefaultStagnation, config_path)
     run_neat(config)
+    # test_ai(config)
