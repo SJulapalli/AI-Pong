@@ -1,5 +1,7 @@
 import pygame
 from pong import Game
+import neat
+import os
 
 class Pong_Game:
 
@@ -37,3 +39,28 @@ class Pong_Game:
             self.game.loop()
             self.game.draw()
             pygame.display.update()
+
+def eval_genomes(genomes, config):
+    pass
+
+def run_neat(config):
+    p = neat.Population(config)
+    p.add_reporter(neat.StdOutReporter(True))
+    stats = neat.StatisticsReporter()
+    p.add_reporter(stats)
+    p.add_reporter(neat.Checkpointer(1))
+
+    p.run(eval_genomes, 50)
+
+if __name__ == "__main__":
+    local_dir = os.path.dirname(__file__)
+    config_path = os.path.join(local_dir, "config.txt")
+
+    config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
+                         neat.DefaultSpeciesSet, neat.DefaultStagnation, config_path)
+
+# Running the game
+# width, height = 700, 500
+# game = Pong_Game(pygame.display.set_mode((width, height)), width, height)
+
+# game.test_ai()
