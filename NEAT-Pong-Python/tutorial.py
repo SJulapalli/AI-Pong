@@ -56,10 +56,22 @@ class PongGame:
 
             # Activate the Neural Networks with the wanted input nodes
             output1 = net1.activate((self.left_paddle.y, self.ball.y, abs(self.left_paddle.x - self.ball.x)))
-            
+            decision1 = output1.index(max(output1))
+
             output2 = net1.activate((self.right_paddle.y, self.ball.y, abs(self.right_paddle.x - self.ball.x)))
-            
-            print(output1, output2)
+            decision2 = output2.index(max(output2))
+
+            if decision1 == 1:
+                self.game.move_paddle(True, True)
+            elif decision1 == 2:
+                self.game.move_paddle(True, False)
+                
+            if decision2 == 1:
+                self.game.move_paddle(False, True)
+            elif decision2 == 2:
+                self.game.move_paddle(False, False)
+
+            # print(output1, output2)
 
             # Handles game loop and display
             game_info = self.game.loop()
@@ -68,12 +80,13 @@ class PongGame:
             pygame.display.update()
 
             # If a paddle misses a ball, we stop testing it
-            if game_info.left_score >= 1 or game_info.right_score >= 1:
+            if game_info.left_score >= 1 or game_info.right_score >= 1 or game_info.left_hits > 50:
                 self.calculate_fitness(genome1, genome2, game_info)
                 break
 
-    def calculate_fitness(genome1, genome2, game_info):
-        pass
+    def calculate_fitness(self, genome1, genome2, game_info):
+        genome1.fitness += game_info.left_hits
+        genome2.fitness += game_info.right_hits
 
 def eval_genomes(genomes, config):
     width, height = 700, 500
