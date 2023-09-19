@@ -36,9 +36,9 @@ class PongGame:
             # Interpretting NN decisions
             # 0 means staying still
             if decision == 1:
-                self.game.move_paddle(True, True)
+                self.game.move_paddle(False, True)
             elif decision == 2:
-                self.game.move_paddle(True, False)
+                self.game.move_paddle(False, False)
 
             # Handles player input
             keys = pygame.key.get_pressed()
